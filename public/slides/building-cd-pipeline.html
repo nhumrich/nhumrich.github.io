@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(images/https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(images/https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(images/https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      .normal {
+        font-size: 35px;
+      }
+      body { font-family: 'Droid Serif';}
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; font-size: 25px;}
+      .inverse {
+        background: #272822;
+        color: #D5D5D8;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .footnote {
+        position: absolute;
+        top: 5em;
+        right: 3em;
+      }
+      .footnote2 {
+        position: absolute;
+        top: 3.5em;
+        right: 3em;
+      }
+      .footnote3 {
+        position: absolute;
+        top: 2em;
+        right: 3em;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .remark-slide-content {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+      }
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+      /* specific slide formatting */
+      #slide-title {
+        background-size: cover;
+      }
+      #slide-companies img {
+        height: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <textarea id="source">
+
+
+name: center
+layout: true
+class: center, middle, title
+---
+name: title
+layout: center
+background-image: url(images/ground.jpg)
+# Building Your Continous Delivery Pipeline from the Ground Up
+
+
+<!--   Outline
+* What is Continuous Delivery (5 min) 
+- Getting Code to your Customers Early and often 
+- Smaller commits are easier to track and code review 
+- When bugs happen, they usually have smaller impact 
+- Testing is easier to do in small bits 
+- Response time for Fixing bugs/security issues is dramatically improved 
+* What is a pipeline (2 min) 
+- Visuals to show a pipeline 
+- multiple "lock-steps" 
+- fully automated 
+- List CI's that support pipelines (slide) 
+* environments (3 min) 
+- why are environments important? 
+- how many should you have? 
+- Purpose for each environment 
+- What criteria decides when you should go to the next environment? 
+* stage 1 
+- Deploy script (5 min)   
+- Lets say my current deploy story is `docker build`, `docker push`, and then I deploy to kubernetes by editing the deployment image.  
+- Now lets script all this so there are no manual steps other than a click of a button 
+- live code adding a docker build/push step in gitlab (running locally) 
+* stage 2 
+- automated tests in the middle of build and push (2 min) 
+- add a section for running tests 
+* stage 3 
+- add environments (2 min) 
+- deploy to an environment 
+-->
+
+.footnote3[Nick Humrich]
+.footnote2[Canopy - Dev Tooling and Infrastructure]
+.footnote[OpenWest - 06/07/2018]
+
+???
+welcome
+---
+template: inverse-center
+
+# What is Continous Delivery?
+
+???
+First and foremost, it means delivering every single commit to production
+---
+layout: false
+class: normal
+
+# Why?
+
+--
+* Getting code to customers early and often
+
+--
+* smaller commits
+
+--
+* smaller impact of changes
+
+--
+* testing is easier
+
+--
+* Response time of fixing things is improved  (security?)
+
+--
+* bugs are less scary
+
+---
+template: center
+# "If it's painful, do it more often."
+
+???
+- we DONT deploy often, because its painful/scary
+
+---
+background-image: url(images/pipeline.png)
+
+# What is a Pipeline?
+
+
+???
+
+A pipeline is a process put in place to commits to ensure quality is high whilst maintaining velocity
+
+A pipeline is a lock step process, which improves over time. 
+
+Like a data pipeline, but for code
+
+As we get further away in the pipeline, the time of feedback decreases.
+
+We want to put the simplist "catches" as close to the dev as possible, quick feedback cycles
+
+---
+.left-column[
+
+  ## Validate
+]
+
+.right-column[
+
+  ## - Lint
+
+  ## - Static Analysis
+
+  ## - Unit tests?
+
+  ## - etc.
+
+]
+
+---
+
+.left-column[
+  ## Validate
+  ## Build
+]
+
+.right-column[
+  ## - Download Dependencies
+  ## - Compile/Build
+  ## - Save Binary/Artifact
+]
+
+---
+# Artifacts
+
+## - Binary
+
+## - Zip/Tar
+
+## - Docker
+
+---
+
+.left-column[
+  ## Validate
+  ## Build
+  ## Test
+]
+.right-column[
+  ## - Unit Tests?
+
+  ## - Integration tests against artifact
+
+  ## - Smoke Tests
+]
+---
+.left-column[
+  ## Validate
+  ## Build
+  ## Test
+  ## Deploy
+]
+
+.right-column[
+  ## - Deploy Artifact
+
+  ## - Near Zero Downtime
+
+  ## - Automated/Scripted
+
+  ## - Same on every environment
+]
+
+---
+# Environments
+
+
+## - Environmnents allow code to get "Closer to production" over time
+## - Typically about 3 environments
+## - There should be a purpose for each environment
+## - Clear criteria for each environment
+
+---
+background-image: url(images/pipeline.png)
+---
+.left-column[
+  ## Tools that support Pipelines
+]
+.right-column[
+  ## - Gitlab
+  ## - Jenkins
+  ## - Wercker
+  ## - GoCD
+  ## - Buddy
+  ## - Shippable
+  ## - BitBucket
+]
+---
+background-image: url(images/tm-pipe.png)
+---
+template: center
+# Examples
+---
+.gitlab-ci.yaml
+```yaml
+image: docker:dind
+
+stages:
+  - build
+  - test
+  - deploy-dev
+  - deploy-preprod
+  - deploy-prod
+
+build:
+  stage: build
+  before_script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script:
+    - docker build --pull -t $CONTAINER_IMAGE .
+    - docker push $REPO_NAME:$CI_COMMIT_SHA
+```
+---
+
+```yaml
+test:
+  services:
+    - postgres:9.6
+  image: $REPO_NAME:$CI_COMMIT_SHA
+  stage: test
+  script: 
+    - python3 -m coverage run pytest    
+
+```
+
+---
+```yaml
+.deploy: &deploy
+  image: nhumrich/deployment
+  script:
+    - sed -i -e "s/{{image}}/$CI_COMMIT_SHA/g" kube-deployment.yaml
+    - kubectl apply -f kube-deployment.yaml
+
+deploy-dev:
+  <<: *deploy
+  environment:
+    name: dev
+    url: https://dev.example.com
+
+deploy-preprod
+  <<: *deploy
+  environment:
+    name: dev
+    url: https://preprod.example.com
+```
+
+???
+You might want to make this its own script
+
+---
+# Other peices to add
+
+## - Testing on environments automatically
+
+## - Canaries
+
+## - Performance testing
+---
+layout: true
+template: center
+---
+# Tips/Extras
+
+---
+
+# Rollbacks
+???
+Part of failing fast, is being able to roll back
+---
+# No manual steps
+???
+- manual steps lead to delayed/larger deploys. 
+- Pipelines can take longer, if they are fully automated
+- Leads to higher quality over time
+- getting rid of manual can feel scary, but leads to better code reviews and quality over time
+---
+# Master (Trunk) Based Development
+???
+- why MBD (or trunk-based) is required for CD
+- How this effects environments 
+- why not feature branches
+---
+# Feature Toggles 
+???
+- separating releases from deploys 
+- allows deployment schedule to be decoupled from business release schedule 
+- smaller commits 
+- usually required wen doing MBD 
+- See devons talk (The Foundation of Rapid Release Cycles) 300A, 3:00
+---
+template: section
+# Thanks
+
+.pull-right[
+\#openwest
+
+@nhumrich
+
+joind.in/talk/3a48e
+]
+
+
+    </textarea>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'monokai',
+        highlightLines: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>

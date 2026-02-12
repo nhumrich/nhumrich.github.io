@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function getPostUrl(post: typeof posts[0]) {
+  const year = post.data.date.getFullYear();
+  const slug = post.slug;
+  return `/${year}/${slug}`;
+}
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+---
+
+<BaseLayout title="Nick Humrich's Blog">
+  <div class="max-w-3xl mx-auto px-5">
+    <div class="space-y-10">
+      {posts.map((post) => (
+        <article>
+          <a href={getPostUrl(post)} class="group block">
+            <h2 class="text-xl font-bold tracking-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {post.data.title}
+            </h2>
+            {post.data.description && (
+              <p class="text-gray-600 dark:text-gray-400 text-[15px] mb-2">{post.data.description}</p>
+            )}
+            <time class="text-sm text-gray-400 dark:text-gray-500" datetime={post.data.date.toISOString()}>
+              {formatDate(post.data.date)}
+            </time>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

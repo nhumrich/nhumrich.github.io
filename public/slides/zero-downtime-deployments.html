@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(images/https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(images/https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(images/https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      .normal {
+        font-size: 35px;
+      }
+      body { font-family: 'Droid Serif';}
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; font-size: 25px;}
+      .inverse {
+        background: #272822;
+        color: #D5D5D8;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .footnote {
+        position: absolute;
+        top: 5em;
+        right: 3em;
+      }
+      .footnote2 {
+        position: absolute;
+        top: 3.5em;
+        right: 3em;
+      }
+      .footnote3 {
+        position: absolute;
+        top: 2em;
+        right: 3em;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .remark-slide-content {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+      }
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+      /* specific slide formatting */
+      #slide-title {
+        background-size: cover;
+      }
+      #slide-companies img {
+        height: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="remark-latest.min.js">
+    </script>
+    <textarea id="source">
+
+
+name: center
+layout: true
+class: center, middle, title
+---
+name: title
+template: center
+class: inverse
+background-image: url(images/loop.gif)
+
+# Strategies for Zero Down Time Frequent Deployments
+
+.footnote3[Nick Humrich]
+.footnote2[Canopy - Dev Tooling and Infrastructure]
+.footnote[DjangoCon - 10/17/2018]
+
+???
+welcome
+---
+template: center
+
+# Why Downtime?
+
+???
+* The default tutorial for web apps is a simple script. Doesnt go over deployment.
+* We like downtime because it makes our jobs easier
+* Less work
+* zero downtime is a lot of work, ergo scheduled downtime is "faster"
+---
+class: normal
+
+## Common Misconception:
+
+# Scheduled Downtime is "faster" in regards to development time
+
+???
+* Tell story of "scheduled maintainence" rollback that happened over and over, because
+every time there was an unforseen issue. (prod data changes)
+
+---
+layout: false
+class: normal
+# The Downtime Death Trap
+
+* Downtime -> Deploy Less Often
+
+* Deploying Less -> Deploy Big
+
+* Deploying Big -> Higher Risk
+
+* Higher Risk -> Fear
+
+* Fear -> Suffering
+
+* Dark Side
+
+???
+* In reality, fear leads to Deploying less often, which begins this giant cycle of death,
+up until everyone hates deploys, and your doing it far far too little, potenially actually killing
+the company
+---
+layout: false
+class: normal
+
+# Continous Delivery
+
+* Deploying Often -> Shorter TTP
+
+* Shorter TTP -> Smaller commits
+
+* Small commits -> Small risk
+
+* Small impacts -> Easier to test
+
+* Testing -> Less stress
+
+* Better, Faster, Stronger, more secure code
+???
+TTP = Time To Production
+---
+template: center
+
+# "If it's painful, do it more often."
+
+???
+- we DONT deploy often, because its painful/scary
+- you never fix your deployment woes, because its too infrequent, so things get worse
+- Doing thing more often, makes you fix it, out of self preservation
+
+---
+template: center
+
+# No Downtime!
+
+???
+Commit to no downtime deploys.
+* Wouldn't you rather deploy in the middle of the day, during work hours?
+* Wouldn't you rather alarms happened during work hours, when everyone is there. Not in the middle of the night?
+* Wouldn't you rather deploy that one stupid change, right away, without having to wait for the release train?
+
+---
+template: center
+
+# How?
+
+---
+background-image: url(images/blue_green_deployments.png)
+
+### Blue/Green Deployment
+
+
+???
+* Deploy everything you need to pre-prod, then swap
+* Two environments, you swap suddenly
+* DNS can be troublesome
+* Load balancer swaps (careful!!: sometimes causes milliseconds of downtime)
+* Con: At large scale, your paying for two environments
+* Could use the other as "staging" though
+* Have to keep two environments completly the same (including scale)
+* There are gradiants to blue/green, where instead of a hard flip, you gradually move green
+* Some do it with two databases, some dont
+* You can do web/app peices independently
+
+---
+background-image: url(images/rolling-deploy.png)
+### Rolling Deployment
+
+
+???
+* Swap an instance/container out at a time
+* Uses some sort of LB (careful: could cause milliseconds of downtime)
+* Have to be careful of connection draining (but its easier than blue-green)
+* Connection timeouts to down containers/instances
+* healthchecks
+* 
+
+---
+class: normal
+
+# Non-Patterns
+
+* process swap
+
+* git push
+
+* directory symlink
+
+---
+class: normal
+
+# Tools
+
+* Kubernetes
+  
+* Elastic Beanstalk 
+  
+* Heroku
+
+---
+template: center
+ # Backwards compatibility
+
+???
+* Blue green you have the issue of already loaded js. The js isnt going to change when you deploy, so you still have to be backwards compatible
+* both are live at a time if you use dns ^
+* rolling deploy you have muliple versions live at a time. So even css/etc needs to be compatible.
+* databases need to also be this way, not just api's
+
+---
+background-image: url(images/blue_green_deployments.png)
+
+### Blue/Green Deployment
+
+
+???
+* Even though you have a hard swap, you have two running. DB needs to be backwards compatible, or else you have a race condition.
+* If you use dns. Both env's will still be in use at a single time
+* Front-end assets are typically loaded already in the browser, so your api has to be backwards compat
+
+---
+background-image: url(images/rolling-deploy.png)
+### Rolling Deployment
+
+
+???
+* You have two versions of your code running side by side. Everything has to be completely backwards compatible.
+---
+name: n
+layout: true
+class: normal
+---
+
+# Ways you need to change your application
+
+* Stateless
+
+* Use cdn for front-end assets
+  
+* No backwards incompatible API's
+  
+* No backwards incompatible database schema changes
+  
+* Healthchecks
+  
+---
+template: n
+
+.left-column[
+
+  ## Stateless
+]
+
+.right-column[
+
+* Shy away from sticky sessions/connection draining
+
+* Use databases for *all* state management (i.e. sessions)
+ 
+
+]
+---
+.left-column[
+
+  ## Stateless
+  ## CDN
+]
+
+.right-column[
+
+* Use a CDN for front-end assets
+
+* This may be self-hosted
+
+* Everything should be versioned
+
+* Store every version, forever
+]
+
+---
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+]
+
+.right-column[
+
+* No renaming/removing fields in json
+
+* Adding new fields is ok
+
+* Maintain basic object structure
+
+* Use api versions, and maintain old ones forever
+]
+
+---
+layout:false
+
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+  ## NBI Schema Changes
+]
+
+.right-column[
+  ```python
+  class Genre(models.Model):
+    name = models.CharField(
+      max_length=200, 
+      help_text='Enter a book genre')
+  ```
+
+  ```python
+  migrations.CreateModel(
+    name='Genre',
+    fields=[
+      ('id', models.AutoField(
+        auto_created=True, 
+        primary_key=True, 
+        serialize=False, 
+        verbose_name='ID')),
+      ('name', models.CharField(
+        help_text='Enter a book genre', 
+        max_length=200)),
+    ],
+  ),
+  ```
+]
+
+---
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+  ## NBI Schema Changes
+]
+
+.right-column[
+  ```python
+  class Genre(models.Model):
+    name = models.CharField(
+      max_length=200,
+      db_index=True,
+      help_text='Enter a book genre')
+  ```
+
+  ```python
+  migrations.AlterField(
+    model_name='genre',
+    name='name',
+    field=models.CharField(
+      db_index=True, 
+      help_text='Enter a book genre', 
+      max_length=200),
+  ),
+  ```
+]
+
+---
+template: n
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+  ## NBI Schema Changes
+]
+.right-column[
+
+* No "data" migrations or serious schema changes
+
+* If needed, use 3-step deploy process
+
+* Run migration __before__ deploy, not during
+]
+
+---
+template: n
+
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+  ## NBI Schema Changes
+]
+.right-column[
+
+# 3-step deploy process
+
+
+1. Support both ways
+   
+2. Move data over
+   
+3. Remove the old
+]
+---
+
+.left-column[
+
+  ## Stateless
+  ## CDN
+  ## NBI APIs
+  ## NBI Schema Changes
+  ## Healthchecks
+]
+.right-column[
+
+  ## - Continously check instance/container health
+
+  ## - Auto cancel/rollback deploys on bad healthchecks
+]
+---
+layout: true
+template: center
+---
+
+# Do it often
+
+###  Increase Confidence
+
+---
+
+  # Artifacts
+
+---
+
+  # Rollbacks
+
+???
+You need to have a very good, easy rollback strategy so that its always an easy plan b
+---
+
+  # Canaries
+
+---
+
+  # Shadow Deploys
+
+---
+
+# Feature Toggles 
+
+## Seperate releases from deployments
+???
+- separating releases from deploys 
+- allows deployment schedule to be decoupled from business release schedule 
+- smaller commits 
+- usually required wen doing MBD 
+
+---
+
+  # Pipelines/Environments
+
+---
+
+  # Worker Tier
+
+---
+
+  # Contract Testing
+
+
+---
+
+# No manual steps in pipeline
+???
+- manual steps lead to delayed/larger deploys. 
+- Pipelines can take longer, if they are fully automated
+- Leads to higher quality over time
+- getting rid of manual can feel scary, but leads to better code reviews and quality over time
+---
+# Master (Trunk) Based Development
+???
+- why MBD (or trunk-based) is required for CD
+- How this effects environments 
+- why not feature branches
+---
+template: section
+# Thanks
+
+.pull-right[
+\#djangocon
+
+@nhumrich
+
+
+]
+
+
+    </textarea>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'monokai',
+        highlightLines: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>

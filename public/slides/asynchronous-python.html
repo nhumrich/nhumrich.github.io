@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(images/https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(images/https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(images/https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; font-size: 25px;}
+      .inverse {
+        background: #272822;
+        color: #D5D5D8;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+        right: 3em;
+      }
+      .footnote2 {
+        position: absolute;
+        bottom:4.5em;
+        right: 3em;
+      }
+      .footnote3 {
+        position: absolute;
+        bottom:6em;
+        right: 3em;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .remark-slide-content {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+      }
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+      /* specific slide formatting */
+      #slide-title {
+        background-size: cover;
+      }
+      #slide-companies img {
+        height: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <textarea id="source">
+
+name: inverse
+layout: true
+class: inverse
+---
+name: section
+layout: true
+class: inverse, middle
+---
+name: inverse-center
+layout: true
+class: center, middle, inverse, title
+---
+name: title
+background-image: url(images/python3d_edit.png)
+#Asynchronous Python
+
+
+
+.footnote3[Nick Humrich]
+.footnote2[Canopy - DevOps Guru]
+.footnote[OpenWest - 7/13/2017]
+
+???
+welcome
+
+---
+template: inverse-center
+
+# What is Async?
+
+---
+name: sync-code
+
+# Here is some synchronous code
+
+```python
+url = 'https://api.github.com/search/repositories?sort=stars&q=language:python'
+top_repos = [r.get('full_name') 
+            for r in requests.get(url).json()\
+                .get('items')[:10]]
+
+for repo in top_repos:
+    print(repo, requests.get(f'https://api.github.com/repos/{r}').json().get('stargazers_count'))
+
+```
+---
+
+name: zen-highlight
+
+# The Zen of Python
+
+`>>> import this`
+
+```markdown
+Beautiful is better than ugly.
+*Explicit is better than implicit.
+*Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+*Readability counts.
+Special cases aren't special enough to break the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+*There should be one-- and preferably only one 
+*  --obvious way to do it.
+Although that way may not be obvious at 
+  first unless you're Dutch.
+ . . .
+
+```
+
+???
+* Explicit is better than implicit
+* Readability counts.
+* There should be one-- and preferably only one --obvious way to do it.
+---
+.left-column[
+  ## Python Basics
+  ### - Simple
+]
+
+.right-columng[
+
+##  Simple is Better than Complex
+
+### Dynamic Typing 
+
+```python
+print('a string')
+print(1)
+print(['a','list'])
+print(Exception('error'))
+```
+```python
+foo = 1
+bar = 'bbb'
+print(foo, bar)
+```
+]
+---
+
+.left-column[
+  ## Python Basics
+  ### - Simple
+  ### - Explicit
+]
+
+.right-column[
+## Explicit is Better than Implicit
+### Strict typing  
+
+python
+```python
+>>> 4 + '4'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: unsupported operand 
+  type(s) for +: 'int' and 'str'
+```
+]
+--
+.right-column[
+javascript
+```javascript
+> 4 + '4'
+'44'
+```
+]
+---
+
+.left-column[
+  ## Python Basics
+  ### - Simple
+  ### - Explicit
+  ### - Readability
+]
+
+.right-column[
+
+## Readability Counts
+### Words instead of symbols 
+
+```python
+if a and b or c:
+  do()
+```
+]
+
+???
+Code is read more than its written
+---
+
+.left-column[
+  ## Python Basics
+  ### - Simple
+  ### - Explicit
+  ### - Readability
+  ### - One Way
+]
+
+.right-column[
+## One Way to Do Things
+### Language with a culture
+
+* ###pep8
+* ###"pythonic"
+* ###Use libraries
+* ###humor
+]
+---
+template: inverse-center
+# Now onto my favorite things
+---
+template: section
+# Keyword Arguments
+
+???
+keyword argements are function parameters where you specify by name in a key-value pair
+
+---
+# Keyword args
+
+```python
+def prettify(object, format, indent_size):
+  if format is None:
+    format = 'json'
+  if indent_size is None:
+    indent_size = 4
+  . . .
+```
+???
+example
+this is a normal function
+no kw args
+--
+- - -
+  
+```python
+def prettify(object, format='json', indent_size=4):  
+  . . .
+```
+
+???
+this is what it looks like if we add the last two args as kw args
+
+These two examples are exactly the same
+
+---
+# Keyword Args
+
+```python
+def prettify(object, format='json', indent_size=4):  
+  . . .
+```
+
+???
+this is what we had
+
+--
+- - -
+```python
+>>> prettify(mydict)
+```
+
+???
+and this is how we call it normally
+--
+- - -
+
+```python
+>>> prettify(mydict, format='yaml', indent_size=2)
+```
+
+???
+this is how we call it with the keywords. Youll notice the kw args are now optional
+
+--
+- - -
+
+```python
+>>> prettify(indent_size=2, object=mydict)
+```
+
+???
+we can call args out of order, we can even use keywords for args that are not explicitly
+keyword args
+
+---
+
+# Keyword Only Args
+
+```python
+def concat(string1, string2, sep=' ')
+  . . .
+```
+
+???
+same as kw args but you HAVE to pass it in as a key-value pair
+
+lets take this example and not pass is as key value pair
+--
+- - -
+```python
+>>> concat('good', 'apple', 'pie')
+```
+
+???
+maybe I see your function and dont understand it right.
+maybe you just want to make it easier for yourself to refactor later
+
+--
+```python
+'goodpieapple'
+```
+---
+
+# Keyword Only Args
+
+```python
+def concat(string1, string2, *, sep=' '):
+  . . .
+```
+
+???
+you can fix that by using a *
+
+--
+- - -
+```python
+>>> concat('good', 'apple', 'pie')
+```
+--
+```markdown
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: concat() takes 2 positional arguments but 3 were given
+```
+
+---
+template: section
+# Packing
+## (and unpacking)
+
+???
+packing is the concept where python packs multiple objects into a tuple
+---
+
+#Packing
+
+```python
+def get_coordinates(shape):
+    return shape.x, shape.y
+```
+???
+Return multiple values, python will pack them automaticly
+--
+- - -
+```python
+>>> coordinates = get_coordinates(square)
+```
+--
+```python
+>>> cordinates
+(5, 7)
+```
+
+---
+
+# Packing
+## (and unpacking)
+```python
+def get_coordinates(shape):
+    return shape.x, shape.y
+```
+
+- - -
+```python
+>>> x, y = get_coordinates(square)
+```
+--
+```python
+>>> x
+5
+>>> y
+7
+```
+
+???
+This is unpacking!!!
+
+Instead of putting things together (like in the return) it pulls them apart
+---
+
+# Packing
+## Star Operator
+
+--
+```python
+def get_coordinates(shape):
+    return shape.w, shape.x, shape.y, shape.z
+```
+--
+- - -
+```python
+>>> w, *_ = get_coordinates(square)
+```
+--
+- - -
+```python
+>>> *_, z = get_coordinates(square)
+```
+--
+- - -
+```python
+>>> w, *_, z = get_coordinates(square)
+```
+---
+# Packing
+## Star Operator
+
+```python
+mylist = [*list1, 'b', *list2]
+```
+--
+- - -
+```python
+myset = {*list1, 'b', *list2}
+```
+--
+- - -
+```python
+mydict = {**dict1, 'a': 1234, **dict2}
+```
+
+---
+# Star in functions signatures
+
+```python
+def myfunc(*args):
+    for arg in args:
+        print("Arg = {}".format(arg))
+```
+???
+* unlimited arguments
+* turns all args into list
+--
+- - -
+```python
+def myfunc(*args, **kwargs):
+    for k, v in kwargs.items():
+       print('I can do keywords as well!'
+             ' k={} v={}'.format(k, v))
+```
+---
+# Star in functions signatures
+
+```python
+def log(string, log_prefix='log: '):
+    print(log_prefix, string)
+```
+--
+- - -
+```python
+def log_blue(string, log_prefix='log: '):
+    log('\033[0;34m' + string, log_prefix)
+```
+
+???
+now I realise there is a bug in this, 
+I have to update in two places
+--
+- - -
+```python
+def log_blue(string, **kwargs):
+    log('\033[0;34m' + string, **kwargs)
+```
+
+---
+# Star in function calls
+
+```python
+>>> print('string 1', 'string 2', sep='\n')
+string 1
+string 2
+```
+--
+- - -
+```python
+>>> my_list = [1,2,3,4]
+>>> print(my_list, sep='\n')
+[1, 2, 3, 4]
+```
+--
+- - -
+```python
+>>> print(*my_list, sep='\n')
+1
+2
+3
+4
+```
+---
+# For loop syntax
+```python
+for item in my_list:
+    print(item)
+```
+???
+no more tracking indexes
+--
+
+## with packing
+
+```python
+for key, value in my_dict.items():
+    print('Key: {}, Value: {}'.format(k, v))
+```    
+---
+template: section
+# Comprehensions
+
+---
+# Comprehensions
+
+```python
+names = list()
+for p in people:
+    if p['age'] > 18:
+        names.append(p['name'])
+```
+--
+- - -
+```python
+names = [p['name'] for p in people if p['age'] > 18]
+```
+--
+```python
+names_gen = (p['name'] for p in people if p['age'] > 18)
+```
+--
+```python
+names_set = {p['name'] for p in people if p['age'] > 18}
+```
+--
+```python
+names_dict = {p['name']: p['age'] for p in people if p['age'] > 18}}
+```
+
+
+---
+template: section
+# pep8/culture
+
+###pep8.org
+---
+# Culture
+
+```python
+class MyClass:
+    def _protected_method():
+        pass
+    def __private_method():
+        # this method's name gets mangled
+        pass
+```
+---
+template: section
+# Iterables
+
+---
+# Iterables
+
+generator
+```python
+def names_gen():
+    for p in people:
+        yield p['name']
+```
+--
+- - -
+list
+```python
+def names_list():
+    return [p['name'] for p in people]
+```
+--
+- - -
+```python
+for n in names_X():
+    print(n)
+```
+???
+might need to explain what a generator is
+---
+# convert to generator
+
+```python
+def get_adults():
+    new_list = []
+    for p in person:
+        if p['age'] > 18:
+            new_list.append(p['name'])
+     return new_list
+```
+
+```python
+def get_adults():
+    for p in people:
+        if p['age'] > 18:
+            yield p
+```
+???
+If people is also a generator then you only have one full loop
+as you are processing the loop only one time
+
+Often people try to rewrite lists so they only have to iterate once,
+generators are an easy way to do this.
+--
+- - -
+```python
+def get_all_adults()
+    yield from get_adults()
+    yield from some_list()
+```
+---
+template: section
+# Monkey Patching
+
+.center[![image](images/monkey-patch.png)]
+
+---
+
+# Monkey Patching
+## testing (mocking)
+
+```python
+def greet():
+    name = input('Enter your name: ')
+    print('Hello', name)
+```
+--
+- - -
+```python
+def greet(_input=input):
+    name = _input('Enter your name: ')
+    print('Hello', name)
+```
+---
+code
+```python
+def greet(_input=input):
+    name = _input('Enter your name: ')
+    print('Hello', name)
+```
+test
+```python
+import greeter
+
+def my_input():
+    return 'bob'
+
+def test_greet():
+    assert 'bob' == greeter.greet(_input=my_input)
+```
+--
+- - -
+```python
+def greet(_input=input, _print=print):
+    ...
+```
+---
+code (greeter.py)
+```python
+def greet():
+    name = input('Enter your name: ')
+    print('Hello', name)
+```
+test
+```python
+import greeter
+def my_input(prompt):
+    return 'bob'
+
+def my_print(*args):
+    global print_args
+    print_args = args
+
+greeter.input = my_input
+greeter.print = my_print
+
+def test_greet():
+    greeter.greet()
+    assert print_args == ('Hello', 'bob')
+```
+---
+code (greeter.py)
+```python
+def greet():
+    name = input('Enter your name: ')
+    print('Hello', name)
+```
+test
+```python
+import greeter
+def my_input(prompt):
+    return 'bob'
+
+def my_print(*args):
+    global print_args
+    print_args = args
+
+*greeter.input = my_input
+*greeter.print = my_print
+
+def test_greet():
+    greeter.greet()
+    assert print_args == ('Hello', 'bob')
+```
+---
+## patching libraries
+```python
+from foobar_api import Client
+
+foobar = Client(id='1234', secret='abcd')
+
+user = foobar.get_user('myusername')
+
+print(user.metadata)
+```
+--
+- - -
+```python
+AttributeError: 'User' object has no attribute 'metadata'
+```
+---
+## patching libraries
+foobar_api.User
+```python
+def map_attributes(self, json):
+    self.username = json['username']
+    self.foobars = json['foobars']
+```
+--
+- - -
+```python
+def my_map_attributes(self, json):
+    self.username = json['username']
+    self.foobars = json['foobars']
+    self.metadata = json['metadata']
+
+foobar_api.User.map_attributes = my_map_attributes     
+```
+---
+## patching libraries
+foobar_api.User
+```python
+def map_attributes(self, json):
+    self.username = json['username']
+    self.foobars = json['foobars']
+```
+- - -
+```python
+def my_map_attributes(self, json):
+    self.username = json['username']
+    self.foobars = json['foobars']
+    self.metadata = json['metadata']
+
+*foobar_api.User.map_attributes = my_map_attributes     
+```
+--
+- - -
+```python
+print(user.metadata)
+```
+---
+template: section
+# help/dir (documentation discovery)
+
+
+There are 3 types of documentation: 
+
+The kind that...
+1. You Don't have
+2. Is out of date
+3. Will be out of date tomorrow
+There is no 4th type
+
+---
+# Help
+
+```python
+class Person:
+    def do_stuff(self):
+        """
+        This method does fancy things
+        """
+        pass
+    
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+```
+---
+
+# Help
+
+```python
+help(Person)
+```
+- - -
+
+```markdown
+Help on class Person in module __main__:
+
+class Person(builtins.object)
+ |  Methods defined here:
+ |  
+ |  __init__(self, name, age)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  do_stuff(self)
+ |      This method does fancy things
+ ```
+
+---
+# Dir
+
+```python
+dir(Person('bob', 17))
+```
+- - -
+```python
+['__class__', '__delattr__', '__dict__', 
+'__dir__', '__doc__', '__eq__', 
+'__format__', '__ge__', '__getattribute__', 
+'__gt__', '__hash__', '__init__', '__le__',
+ '__lt__', '__module__', '__ne__', '__new__', 
+ '__reduce__', '__reduce_ex__', '__repr__', 
+ '__setattr__', '__sizeof__', '__str__', 
+ '__subclasshook__', '__weakref__', 'age', 
+ 'do_stuff', 'name']
+```
+---
+template: section
+# **with**
+## (context managers)
+
+---
+
+```python
+try:
+    connection = database.connect()
+    try:
+        transaction = connection.begin()
+        transaction.query(my_query_string)
+        transaction.commit()
+    except TransactionError as e:
+        log(e)
+        if transaction:
+            transaction.rollback()
+    finally:
+        transaction.close()
+except DatabaseError as e:
+    log(e)
+finally:
+    connection.close()
+```
+--
+- - -
+```python
+with database.connect() as connection, \
+         connection.begin() as transaction:
+     transaction.query(my_query_string)
+```
+
+---
+template: section
+# batteries included
+
+---
+# Batteries Included
+```python
+index[1]
+reverse_index[-1]
+
+subset[1:2]
+subset[3:]
+subset[:-3]
+
+slice[1:10:3]
+slice[::2]
+reverse[::-1]
+```
+---
+# Batteries included
+
+
+```python
+# Leftpad
+string.rjust(10)
+
+#stripping
+string.strip()
+string.strip('#')
+
+#regex
+import re
+regex_string = r'some\sreg[e]x(\d)+'
+
+
+#json
+import json
+dict = json.loads(string)
+string = json.dumps(dict)
+```
+
+---
+template: section
+# Thanks
+
+.pull-right[
+\#openwest
+
+@nhumrich
+
+joind.in/talk/547f
+]
+
+
+    </textarea>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'monokai',
+        highlightLines: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>

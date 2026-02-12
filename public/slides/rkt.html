@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(images/https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(images/https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(images/https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { 
+        font-family: 'Ubuntu Mono'; 
+        font-size: 25px;
+      }
+      .inverse {
+        background: #272822;
+        color: #D5D5D8;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+        right: 3em;
+      }
+      .footnote2 {
+        position: absolute;
+        bottom:4.5em;
+        right: 3em;
+      }
+      .footnote3 {
+        position: absolute;
+        bottom:6em;
+        right: 3em;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .white-back img {
+          background-color: #fff;
+      }
+      .remark-slide-content {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+      #slide-title {
+          background-size: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <textarea id="source">
+
+name: inverse-center
+layout: true
+class: inverse, center
+---
+name: section
+layout: true
+class: inverse, middle
+---
+name: inverse-title
+layout: true
+class: inverse, title, middle
+---
+name: title
+background-image: url(images/rkt-logo.png)
+#  Intro to rkt
+
+
+.footnote3[Nick Humrich]
+.footnote2[Canopy - DevOps Guru]
+.footnote[OpenWest - 7/15/2016]
+
+???
+An intro to rkt. Walk through how to build a container using rkt.
+* Running rkt containers
+* How to build your own
+* How to deploy
+* How to store
+* How to distribute
+* Running Docker containers from rkt
+* quay.io, a repository for rkt
+* rkt vs. Docker
+
+---
+name: inverse
+layout: true
+class: inverse
+---
+class: inverse, middle
+
+
+name: rkt
+
+# What is rkt?
+
+- Container runtime
+- CoreOS
+- Open Container Initiative
+
+---
+layout: true
+class: inverse, middle, center
+---
+background-image: url(images/street-vendor.jpg)
+---
+background-image: url(images/boxes.jpg)
+---
+background-image: url(images/containers.jpg)
+
+
+---
+background-image: url(images/street-vendor.jpg)
+--
+.white-back[![](images/old-ops.png)]
+
+---
+background-image: url(images/boxes.jpg)
+--
+.white-back[![](images/traditional-ops.png)]
+---
+background-image: url(images/containers.jpg)
+--
+.white-back[![](images/modern-ops.png)]
+---
+layout: true
+class: inverse, middle
+---
+# A history on containers
+
+???
+* cgroups was introduced in linux 2.6.24
+ * similar to BSD Jails
+* lxc based on cgroups
+* used before docker existed
+* OS virtualization
+* google, apache mesos
+* dotcloud made docker
+* then docker came along
+* lead to Open Container Initiative
+---
+
+# Open Container Initiative
+
+---
+
+background-image: url(images/rkt-supporting-companies.png)
+
+???
+these are suppoters of the OCI
+
+---
+
+# Pieces
+- appC - Container spec
+- acbuild - Build
+- runC - Container runtime
+- Pods
+- Metadata service
+
+---
+
+# App Container Spec
+
+An App Container Image (ACI) contains all files and metadata needed to execute a given app. 
+In some ways an ACI can be thought of as equivalent to a static binary.
+
+https://github.com/appc/spec
+
+---
+layout: true
+class: inverse
+---
+template: section
+# acbuild
+
+---
+
+# Building a simple go app
+
+```
+#!/bin/bash
+acbuild begin
+
+acbuild set-name example.com/hello
+acbuild copy hello /bin/hello
+acbuild set-exec /bin/hello
+acbuild port add www tcp 5000
+acbuild label add version 0.0.1
+acbuild annotation add authors "Nick"
+acbuild write hello-0.0.1-linux-amd64.aci
+
+acbuild end
+```
+---
+
+# Something more complicated
+
+```
+#!/bin/bash -e
+acbuild --debug begin
+
+acbuild --debug set-name python-base
+acbuild --debug label add language python
+acbuild --debug dep add quay.io/coreos/alpine-sh
+
+acbuild --debug run apk update
+acbuild --debug run apk add python3
+acbuild --debug run python3 -- --version
+
+acbuild --debug set-exec -- /usr/bin/python3
+
+acbuild --debug write --overwrite python-base.aci
+acbuild end
+```
+---
+template: section
+# Pods
+
+A deployable, executable unit in the App Container specification
+---
+template: section
+# MetaData Service
+
+---
+template:section
+
+# Container Runtimes
+* runc
+* kurma
+* rkt
+
+---
+template: section
+# rkt
+
+---
+# Running the Container
+
+
+```
+# rkt run --interactive python-base
+image: using image from local store 
+  for image name coreos.com/rkt/stage1-coreos:1.10.0
+image: using image from local store 
+  for image name python-base
+image: using image from local store 
+  for image name quay.io/coreos/alpine-sh
+networking: loading networks from /etc/rkt/net.d
+networking: loading network default with type ptp
+Python 3.4.3 (default, Apr 24 2015, 18:29:10) 
+[GCC 4.9.2] on linux
+Type "help", "copyright", "credits" 
+  or "license" for more information.
+>>>
+```
+
+---
+# Running Containers
+
+```
+# rkt run --interactive \
+  quay.io/coreos/alpine-sh --exec sh
+```
+- - -
+```
+/ # apk update
+fetch http://dl-4.alpinelinux.org/alpine/v3.2/main/x86_64/APKINDEX.tar.gz
+ERROR: http://dl-4.alpinelinux.org/alpine/v3.2/main: 
+  temporary error (try again later)
+WARNING: Ignoring APKINDEX.abd86498.tar.gz: 
+  No such file or directory
+1 errors; 15 distinct packages available
+```
+
+--
+- - -
+```
+/ # wget openwest.org
+wget: bad address 'openwest.org'
+```
+
+---
+# Running Containers
+
+you have to add `--dns 8.8.8.8` if you want to use url's
+
+```
+# rkt run --interactive --dns 8.8.8.8 \
+  quay.io/coreos/alpine-sh --exec sh
+
+/ # wget openwest.org
+Connecting to openwest.org (50.116.6.76:80)
+Connecting to www.openwest.org (50.116.6.76:443)
+. . .
+```
+---
+template: section
+# machinectl
+
+???
+linux command line for running linux containers
+---
+
+# machinectl
+
+```
+# machinectl
+MACHINE                                  CLASS     SERVICE
+rkt-47efa49b-3d48-48e9-b3b1-7b409cdfcf1e container rkt    
+
+1 machines listed.
+```
+--
+- - -
+```
+# machinectl kill rkt-47efa49b-3d48-48e9-b3b1-7b409cdfcf1e
+#
+```
+--
+- - -
+```
+# machinectl
+MACHINE                                  CLASS     SERVICE
+rkt-47efa49b-3d48-48e9-b3b1-7b409cdfcf1e container rkt    
+
+1 machines listed.
+```
+???
+kill just send the signal to die, it doesnt force death
+---
+template: section
+# SystemD Integration
+
+???
+rkt has no deamon, unlike docker
+it just starts the container
+
+you can use systemd to acheive deamon processes
+---
+
+#SystemD
+
+```
+$ systemd-run --slice=machine rkt run \
+  coreos.com/etcd:v2.2.5
+Running as unit: run-rdad9a8ce5.service
+```
+--
+```
+# systemctl status run-rdcad96dcd4914718911d331ead9a8ce5.service
+● run-rdcad96dcd4914718911d331ead9a8ce5.service - /usr/bin/rkt run coreos.com/etcd:v2.2.5
+   Loaded: loaded (/run/systemd/transient/run-rdcad96dcd4914718911d331ead9a8ce5.service; transient; vendor preset: disab
+   Active: active (running) since Tue 2016-07-12 16:20:28 MDT; 2min 22s ago
+ Main PID: 32564 (ld-linux-x86-64)
+   Memory: 69.7M
+      CPU: 2.128s
+   CGroup: /machine.slice/run-rdcad96dcd4914718911d331ead9a8ce5.service
+           ├─32564 stage1/rootfs/usr/lib/ld-linux-x86-64.so.2 stage1/rootfs/usr/bin/systemd-nspawn --boot --register=tru
+           ├─init.scope
+           │ └─32630 /usr/lib/systemd/...
+           └─system.slice
+             ├─. . 
+```
+???
+systemd-run lets you "test" systemd
+
+--slice=machine says to create a cgroup (machine.slice) rather than system.slice
+
+---
+#SystemD
+
+ectd.service
+```
+[Unit]
+Description=etcd
+
+[Service]
+Slice=machine.slice
+ExecStart=/usr/bin/rkt run coreos.com/etcd:v2.2.5
+KillMode=mixed
+Restart=always
+```
+--
+```bash
+$ systemctl start etcd.service
+$ systemctl stop etcd.service
+$ systemctl restart etcd.service
+$ systemctl enable etcd.service
+$ systemctl disable etcd.service
+```
+---
+template: section
+# Other rkt Commands
+
+---
+
+```
+# rkt image list
+ID			NAME						IMPORT TIME	LAST USED	SIZE	LATEST
+sha512-1eba37d9b344	coreos.com/etcd:v2.0.4				2 months ago	2 months ago	24MiB	false
+sha512-ffefd9afb971	quay.io/dghubble/python3:latest			2 months ago	2 months ago	108MiB	true
+sha512-027dbe8300a5	coreos.com/rkt/stage1-coreos:1.8.0		2 weeks ago	2 weeks ago	84MiB	false
+sha512-2222d0a86708	quay.io/coreos/alpine-sh:latest			2 weeks ago	2 weeks ago	5.4MiB	true
+sha512-5944831b95e8	python-base					2 weeks ago	2 weeks ago	5.7MiB	false
+sha512-9bc2a999e131	python-base					2 weeks ago	2 weeks ago	46MiB	false
+sha512-97d47005dc8a	registry-1.docker.io/library/alpine:latest	2 weeks ago	2 weeks ago	4.8MiB	false
+sha512-d312ea46ddaf	coreos.com/rkt/stage1-coreos:1.10.0		18 hours ago	18 hours ago	178MiB	false
+sha512-938efe6e0cba	coreos.com/etcd:v2.2.5				11 minutes ago	11 minutes ago	56MiB	false
+```
+--
+- - -
+```
+# rkt list
+UUID		APP		IMAGE NAME					STATE		CREATED		STARTEDNETWORKS
+06097c9a	python-base	python-base					exited		2 weeks ago	2 weeks ago	
+0ae6e669	busybox		registry-1.docker.io/library/busybox:latest	exited		2 weeks ago	2 weeks ago	
+0f577c6d	alpine-sh	quay.io/coreos/alpine-sh:latest			exited		2 weeks ago	2 weeks ago	
+0f947f46	python-base	python-base					exited		2 weeks ago	2 weeks ago	
+12280952	python-base	python-base					prepared	18 hours ago		
+. . .
+```
+???
+note that rkt list shows ALL containers ever
+---
+```
+# rkt gc
+gc: moving pod "06097c9a-7bd5-458b-9f0f-d35fa19b3b6d" to garbage
+gc: moving pod "0f947f46-e026-4c67-9e84-3a01af222d3a" to garbage
+gc: moving pod "3243caa3-893c-4f9e-aac8-1b19b5ed25a7" to garbage
+gc: moving pod "5be19478-c915-451d-a641-4380563a23bf" to garbage
+. . 
+gc: pod "d0672688-73c6-4074-9417-ca5d255a33bb" not removed: still within grace period (30m0s)
+Garbage collecting pod "d873462b-0999-42b1-bcc2-cf43088d41b5"
+networking: teardown - executing net-plugin ptp
+gc: pod "dab4644d-50e3-4415-abd3-f1f44bd7b3e6" not removed: still within grace period (30m0s)
+networking: teardown - executing net-plugin ptp
+Garbage collecting pod "8ab18977-201f-4d82-a135-3c8090edab48"
+```
+---
+
+template: section
+# distributing your container
+
+---
+# github
+```
+# rkt fetch https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci
+image: remote fetching from URL "https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci"
+image: downloading signature from https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci.asc
+fetch: bad HTTP status code: 404
+```
+--
+- - -
+```
+# rkt fetch --insecure-options=image \
+  https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci
+image: remote fetching from URL "https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci"
+Downloading ACI: [=============================================] 345 B/345 B
+image: using image from local store for image name quay.io/coreos/alpine-sh
+sha512-beca9d9c2377faeed9803658fcdcd5d7
+```
+
+???
+* create a release on github
+* simply drop aci file as a "release binary" in github
+---
+#signing
+
+gpg-patch
+```
+%echo Generating a default key
+Key-Type: RSA
+Key-Length: 2048
+Subkey-Type: RSA
+Subkey-Length: 2048
+Name-Real: Nick
+Name-Comment: ACI signing key
+Name-Email: nick@humrich.us
+Expire-Date: 0
+Passphrase: rkt
+%pubring rkt.pub
+%secring rkt.sec
+%commit
+%echo done
+```
+---
+#signing
+
+create keyring
+```
+# gpg --batch --gen-key gpg-batch
+```
+- - -
+export pub key
+```
+# gpg --no-default-keyring --armor \
+--secret-keyring ./rkt.sec --keyring ./rkt.pub \
+--export carly@example.com > pubkeys.gpg
+```
+- - -
+sign
+```
+# gpg --no-default-keyring --armor \
+--secret-keyring ./rkt.sec --keyring ./rkt.pub \
+--output python-base.aci.asc \
+--detach-sig python-base.aci
+```
+
+---
+# github
+
+```
+# rkt trust https://github.com/.../pubkeys.gpg
+```
+
+```
+# rkt fetch . . .
+image: remote fetching from URL "https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci"
+image: downloading signature from https://github.com/nhumrich/nhumrich.github.io/releases/download/0.1.0/python-base.aci.asc
+Downloading signature: [=======================================] 473 B/473 B
+image: using image from local store for image name quay.io/coreos/alpine-sh
+sha512-beca9d9c2377faeed9803658fcdcd5d7
+
+```
+---
+#Discovery
+
+```
+# rkt fetch humrich.us/python
+```
+--
+- - -
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="ac-discovery" 
+      content="humrich.us/python 
+      https://humrich.us/images/python-base.{ext}">
+    <meta name="ac-discovery-pubkeys" 
+      content="humrich.us/python 
+      https://humrich.us/pubkeys.gpg">
+  </head>
+</html>
+```
+---
+
+template: section
+# quay.io
+
+???
+quay is a container repo from coreos
+
+suprise! you cant upload your aci to quay
+
+but if you use docker in quay it will convert to rkt (aci) with `rkt fetch`
+---
+
+template: section
+# deploying
+
+use kubernetes or coreos
+
+---
+template: section
+# rkt vs docker
+
+---
+background-image: url(images/docker-architecture.png)
+
+???
+docker architecture
+* explain how deamon works
+
+---
+template: section
+# Pros and cons of deamon
+
+
+???
+pros:
+* client can talk to remote host
+ * good for vms
+ * deployments/debugging can be cool
+* One process that controls all containers
+ * easier to see what containers are doing versus none containers
+* easier to understand
+
+cons:
+* remote aspect makes it less secure
+* an extra (unneeded) process
+* doesn't use linux supervisor
+* almost like throwing years of linux out the window
+
+---
+# Dockerfile vs acbuild
+
+```
+acbuild --debug begin
+
+acbuild --debug set-name python-base
+acbuild --debug label add language python
+acbuild --debug dep add quay.io/coreos/alpine-sh
+
+acbuild --debug run apk update
+acbuild --debug run apk add python3
+acbuild --debug run python3 -- --version
+
+acbuild --debug set-exec -- /usr/bin/python3
+
+acbuild --debug write --overwrite python-base.aci
+acbuild end
+```
+
+???
+* bash files are powerfull
+* bash is also hard
+* lots of reptative steps
+* no standard name
+
+docker
+* not as powerful, no loops
+* special syntax requires docs
+ * not as good highlighting support
+* a standard file that exists in every project
+* docker build is an easy command
+* much more simple
+
+---
+template: section
+
+#docker-compose vs pods
+
+
+---
+template: section
+# Thanks
+
+.pull-right[
+\#openwest
+
+@nhumrich
+
+joind.in/talk/ba226
+]
+
+
+    </textarea>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'zenburn',
+        highlightLines: true,
+        highlightLanguage: 'markdown',
+        highlightSpans: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
