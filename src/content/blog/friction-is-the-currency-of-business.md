@@ -58,8 +58,6 @@ This is what happens to friction everywhere when you don't actively design it. D
 
 If you're a leader, this is one of the most useful things you can ever audit. Walk through your processes and ask, for every step that has friction: who is this friction protecting, against what, and is the threat still real? And then walk through the dangerous things and ask: where is there no friction at all, and should there be?
 
-![a balance scale tipping out of equilibrium](/media/friction-coefficient-shift.png)
-
 ## The AI era: every coefficient just changed
 
 Now, the real reason why I am writing this post: AI. (come on, you had to see this coming, it's 2026 after all)
