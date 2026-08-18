@@ -1,6 +1,6 @@
 ---
 title: "SaaS is not dead. Calm Down."
-date: 2026-18-08
+date: 2026-08-18
 tags: [saas, ai, open-source, fud]
 draft: false
 ---
